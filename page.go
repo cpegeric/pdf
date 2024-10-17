@@ -752,18 +752,18 @@ func (p Page) walkTextBlocks(walker func(enc TextEncoding, x, y float64, s strin
 		}
 	})
 }
-//
+
 // Content returns the page's content.
 //
-// bugfix: 
+// bugfix:
+//
 //	the /Content may contain an array of refs
 //	this leads to an endless loop
-//
 func (p Page) Content() Content {
-	
+
 	var text []Text
 	var rect []Rect
-	
+
 	//fmt.Println("page=",p)
 	strm := p.V.Key("Contents")
 
@@ -774,12 +774,12 @@ func (p Page) Content() Content {
 	} else {
 		for i := 0; i < strm.Len(); i++ {
 			strmindex := strm.Index(i)
-			//fmt.Println("stream ",i,"=",strmindex)
+			//fmt.Println("stream ", i, "=", strmindex)
 
 			c := p.readContent(strmindex)
 			text = append(text, c.Text...)
 			rect = append(rect, c.Rect...)
-		}	
+		}
 	}
 	return Content{text, rect}
 }
@@ -791,7 +791,7 @@ func (p Page) readContent(strm Value) Content {
 		Th:  1,
 		CTM: ident,
 	}
-	
+
 	var text []Text
 	showText := func(s string) {
 		n := 0
@@ -872,7 +872,7 @@ func (p Page) readContent(strm Value) Content {
 
 		case "Q": // restore graphics state
 			n := len(gstack) - 1
-			if n >= 0 {	// bugfix: don't raise an exception
+			if n >= 0 { // bugfix: don't raise an exception
 				g = gstack[n]
 				gstack = gstack[:n]
 			}
@@ -881,6 +881,7 @@ func (p Page) readContent(strm Value) Content {
 			g.Tlm = g.Tm
 
 		case "ET": // end text
+			text = append(text, Text{"", 0, 0, 0, 0, ""})
 
 		case "T*": // move to start of next line
 			x := matrix{{1, 0, 0}, {0, 1, 0}, {0, -g.Tl, 1}}
@@ -944,7 +945,7 @@ func (p Page) readContent(strm Value) Content {
 			showText(args[0].RawString())
 
 		case "TJ": // show text, allowing individual glyph positioning
-			if len(args) > 0 {	// bugfix: don't raise an exception
+			if len(args) > 0 { // bugfix: don't raise an exception
 				v := args[0]
 				for i := 0; i < v.Len(); i++ {
 					x := v.Index(i)
